@@ -33,7 +33,6 @@ describe('api/reviews', ()=>{
     test('responds with an array full of reviews with correct categories', ()=>{
         return request(app).get('/api/reviews')
         .then((result)=>{
-            console.log(result.body.length)
             result.body.forEach((review)=>{
                 expect(review).toHaveProperty('title')
                 expect(review).toHaveProperty('designer')

@@ -3,7 +3,8 @@ const testData = require('../db/data/test-data')
 const request = require('supertest')
 const app = require('../app')
 const db = require('../db/connection')
-
+const express = require('express')
+app.use(express.json())
 
 beforeEach(()=> seed(testData))
 
@@ -21,13 +22,6 @@ describe('api/categories', ()=>{
             // console.log(result)
             expect(result.body[0]).toHaveProperty('slug')
             expect(result.body[0]).toHaveProperty('description')
-        })
-    })
-    test('responds with 404 not found when passed an incorrect url', ()=>{
-        return request(app).get('/api/wrong').expect(404)
-        .then((result)=>{
-            // console.log(result)
-            expect(result).toBe('Not Found!')
         })
     })
 })

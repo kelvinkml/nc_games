@@ -19,9 +19,9 @@ describe('api/categories', ()=>{
     test('responds with an array full of categories with slug and description properties', ()=>{
         return request(app).get('/api/categories').expect(200)
         .then((result)=>{
-            // console.log(result)
             expect(result.body[0]).toHaveProperty('slug')
             expect(result.body[0]).toHaveProperty('description')
+            expect(result.body.length).toBe(4)
         })
     })
 })

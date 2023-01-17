@@ -42,6 +42,7 @@ describe('api/reviews', ()=>{
                 expect(review).toHaveProperty('category')
                 expect(review).toHaveProperty('created_at')
                 expect(review).toHaveProperty('votes')
+                expect(review).toHaveProperty('comment_count')
             })
         })
     })
@@ -62,6 +63,7 @@ describe('api/review/:review_id', ()=>{
             expect(output).toHaveProperty('category')
             expect(output).toHaveProperty('created_at')
             expect(output).toHaveProperty('votes')
+            expect(output).toHaveProperty('comment_count')
         })
     })
     test('responds with 404 Not Found when passed resource that doesnt exist', ()=>{

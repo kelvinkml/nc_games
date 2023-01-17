@@ -85,13 +85,15 @@ describe('/get/reviews/:review_id/comments', ()=>{
     test('responds with an array of comments when passed a review ID', ()=>{
         return request(app).get('/api/reviews/2/comments').expect(200).then((result)=>{
             const output = result.body.comments
+            // console.log(output)
+            expect(output.length).toBe(3)
             output.forEach((comment)=>{
-                expect(comment).toHaveProperty('comment_id')
-                expect(comment).toHaveProperty('body')
-                expect(comment).toHaveProperty('votes')
-                expect(comment).toHaveProperty('author')
-                expect(comment).toHaveProperty('review_id')
-                expect(comment).toHaveProperty('created_at')
+                expect(comment).toHaveProperty('comment_id', expect.any(Number))
+                expect(comment).toHaveProperty('body', expect.any(String))
+                expect(comment).toHaveProperty('votes', expect.any(Number))
+                expect(comment).toHaveProperty('author', expect.any(String))
+                expect(comment).toHaveProperty('review_id', expect.any(Number))
+                expect(comment).toHaveProperty('created_at', expect.any(String))
             })
         })
     })

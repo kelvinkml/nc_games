@@ -3,8 +3,6 @@ const testData = require('../db/data/test-data')
 const request = require('supertest')
 const app = require('../app')
 const db = require('../db/connection')
-const express = require('express')
-app.use(express.json())
 
 beforeEach(()=> seed(testData))
 
@@ -33,7 +31,9 @@ describe('api/reviews', ()=>{
     test('responds with an array full of reviews with correct categories', ()=>{
         return request(app).get('/api/reviews')
         .then((result)=>{
-            result.body.forEach((review)=>{
+            const output = result.body.reviews
+            expect(output).toHaveLength(13)
+            output.forEach((review)=>{
                 expect(review).toHaveProperty('title')
                 expect(review).toHaveProperty('designer')
                 expect(review).toHaveProperty('owner')
@@ -43,6 +43,35 @@ describe('api/reviews', ()=>{
                 expect(review).toHaveProperty('created_at')
                 expect(review).toHaveProperty('votes')
             })
+        })
+    })
+})
+
+describe('api/review/:review_id', ()=>{
+    test('responds with 200', ()=>{
+        return request(app).get('/api/reviews/1').expect(200)
+    })
+    test('responds with a single review by id', ()=>{
+        return request(app).get('/api/reviews/1').expect(200).then((review)=>{
+            const output = review.body.review[0]
+            expect(output).toHaveProperty('title')
+            expect(output).toHaveProperty('designer')
+            expect(output).toHaveProperty('owner')
+            expect(output).toHaveProperty('review_img_url')
+            expect(output).toHaveProperty('review_body')
+            expect(output).toHaveProperty('category')
+            expect(output).toHaveProperty('created_at')
+            expect(output).toHaveProperty('votes')
+        })
+    })
+    test('responds with 404 Not Found when passed resource that doesnt exist', ()=>{
+        return request(app).get('/api/reviews/9999').expect(404).then((err)=>{
+            expect(err.body.msg).toBe("Not Found!")
+        })
+    })
+    test('responds with 400 bad request when passed invalid id', ()=>{
+        return request(app).get('/api/reviews/eggs').expect(400).then((err)=>{
+            expect(err.body.msg).toBe('Bad Request!')
         })
     })
 })

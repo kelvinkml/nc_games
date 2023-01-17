@@ -8,7 +8,8 @@ const fetchReviews = ()=>{
    (`SELECT reviews.* , COUNT(reviews.review_id) AS comment_count 
    FROM reviews
    LEFT JOIN comments ON reviews.review_id = comments.review_id
-   GROUP BY reviews.review_id;`)
+   GROUP BY reviews.review_id
+   ORDER BY created_at DESC;`)
    .then((reviews)=>{
       // console.log(reviews.rows)
       return {reviews:reviews.rows}

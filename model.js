@@ -1,3 +1,4 @@
+const { response } = require("./app")
 const db = require("./db/connection")
 
 const fetchCategories = ()=>{
@@ -28,4 +29,18 @@ const fetchReviewById = (reviewId) => {
    })
 }
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById}
+const fetchComments = (reviewId) => {
+   return db.query(`
+   SELECT * FROM comments
+   WHERE comments.review_id = $1
+   ORDER BY created_at DESC
+   ;`, [reviewId]).then((comments)=>{
+      if(comments.rows.length === 0){
+         return Promise.reject({status:404, msg:'Not Found!'})
+      }
+      else
+      return {comments: comments.rows}
+   })
+}
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments}

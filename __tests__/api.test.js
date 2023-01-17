@@ -77,3 +77,41 @@ describe('api/review/:review_id', ()=>{
         })
     })
 })
+
+describe('/get/reviews/:review_id/comments', ()=>{
+    test('responds with 200', ()=>{
+        return request(app).get('/api/reviews/3/comments').expect(200)
+    })
+    test('responds with an array of comments when passed a review ID', ()=>{
+        return request(app).get('/api/reviews/2/comments').expect(200).then((result)=>{
+            const output = result.body.comments
+            // console.log(output)
+            expect(output.length).toBe(3)
+            output.forEach((comment)=>{
+                expect(comment).toHaveProperty('comment_id', expect.any(Number))
+                expect(comment).toHaveProperty('body', expect.any(String))
+                expect(comment).toHaveProperty('votes', expect.any(Number))
+                expect(comment).toHaveProperty('author', expect.any(String))
+                expect(comment).toHaveProperty('review_id', expect.any(Number))
+                expect(comment).toHaveProperty('created_at', expect.any(String))
+            })
+        })
+    })
+    test('results should be in order of created first', ()=>{
+        return request(app).get('/api/reviews/2/comments').expect(200).then((result)=>{
+            const output = result.body.comments
+            expect(output).toBeSorted({descending: 'true', key : 'created_at'})
+        })
+    })
+    test('responds with custom message when no comments are found', ()=>{
+        return request(app).get('/api/reviews/100/comments').expect(404)
+        .then((err)=>{
+            expect(err.body.msg).toBe("Not Found!")
+        })
+    })
+    test('responds with 400 bad request when passed invalid id', ()=>{
+        return request(app).get('/api/reviews/eggs/comments').expect(400).then((err)=>{
+            expect(err.body.msg).toBe('Bad Request!')
+        })
+    })
+})

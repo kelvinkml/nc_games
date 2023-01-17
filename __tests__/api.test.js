@@ -25,3 +25,24 @@ describe('api/categories', ()=>{
         })
     })
 })
+
+describe('api/reviews', ()=>{
+    test('responds with status code 200', ()=>{
+        return request(app).get('/api/reviews').expect(200)
+    })
+    test('responds with an array full of reviews with correct categories', ()=>{
+        return request(app).get('/api/reviews')
+        .then((result)=>{
+            result.body.forEach((review)=>{
+                expect(review).toHaveProperty('title')
+                expect(review).toHaveProperty('designer')
+                expect(review).toHaveProperty('owner')
+                expect(review).toHaveProperty('review_img_url')
+                expect(review).toHaveProperty('review_body')
+                expect(review).toHaveProperty('category')
+                expect(review).toHaveProperty('created_at')
+                expect(review).toHaveProperty('votes')
+            })
+        })
+    })
+})

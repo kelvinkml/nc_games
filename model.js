@@ -11,7 +11,6 @@ const fetchReviews = ()=>{
    GROUP BY reviews.review_id
    ORDER BY created_at DESC;`)
    .then((reviews)=>{
-      // console.log(reviews.rows)
       return {reviews:reviews.rows}
    })
 }
@@ -25,7 +24,6 @@ const fetchReviewById = (reviewId) => {
          return Promise.reject({status:404, msg:'Not Found!'})
       }
       else 
-      console.log({review: review.rows})
       return {review : review.rows}
    })
 }

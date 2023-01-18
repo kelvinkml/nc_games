@@ -130,7 +130,6 @@ describe('POST api/reviews/:review_id/comments', ()=>{
                 username: 'philippaclaire9',
             }
             return request(app).post('/api/reviews/2/comments').send(commentToPost).expect(201).then((response)=>{
-                console.log(response.body.comment[0])
                 const output = response.body.comment[0]
                 expect(output).toHaveProperty('comment_id', expect.any(Number))
                 expect(output).toHaveProperty('body', expect.any(String))

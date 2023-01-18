@@ -1,5 +1,7 @@
 const { response } = require("./app")
 const db = require("./db/connection")
+const format = require('pg-format')
+
 
 const fetchCategories = ()=>{
    return db.query(`SELECT * FROM categories;`)
@@ -34,7 +36,8 @@ const fetchComments = (reviewId) => {
    SELECT * FROM comments
    WHERE comments.review_id = $1
    ORDER BY created_at DESC
-   ;`, [reviewId]).then((comments)=>{
+   ;`, [reviewId])
+   .then((comments)=>{
       if(comments.rows.length === 0){
          return Promise.reject({status:404, msg:'Not Found!'})
       }
@@ -43,4 +46,19 @@ const fetchComments = (reviewId) => {
    })
 }
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments}
+const newComment = (review_id, comment) => {
+   const {body, username} = comment
+   return db.query(`INSERT INTO comments (body, review_id, author) VALUES ($1,$2,$3) RETURNING *`, [body, review_id, username])
+   .then((comment)=>{
+      return {comment: comment.rows}
+   })
+   .catch(()=>{
+      let accepted = +review_id
+      if(!accepted){
+         return Promise.reject({status:400, msg: "Invalid Id, please enter a number."})
+      }
+      return Promise.reject({status:404, msg: "You can't comment on a review that doesn't exist!"})
+   })
+
+}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment}

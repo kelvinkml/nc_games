@@ -32,33 +32,30 @@ const fetchReviewById = (reviewId) => {
 }
 
 const fetchComments = (reviewId) => {
-   return db.query(`
+
+   const returnQuery = db.query(`
    SELECT * FROM comments
    WHERE comments.review_id = $1
    ORDER BY created_at DESC
    ;`, [reviewId])
+
+   return Promise.all([returnQuery, fetchReviewById(reviewId)])
    .then((comments)=>{
-      if(comments.rows.length === 0){
-         return Promise.reject({status:404, msg:'Not Found!'})
-      }
-      else
-      return {comments: comments.rows}
+      return {comments: comments[0].rows}
    })
 }
 
 const newComment = (review_id, comment) => {
    const {body, username} = comment
-   return db.query(`INSERT INTO comments (body, review_id, author) VALUES ($1,$2,$3) RETURNING *`, [body, review_id, username])
-   .then((comment)=>{
-      return {comment: comment.rows}
-   })
-   .catch(()=>{
-      let accepted = +review_id
-      if(!accepted){
-         return Promise.reject({status:400, msg: "Invalid Id, please enter a number."})
-      }
-      return Promise.reject({status:404, msg: "You can't comment on a review that doesn't exist!"})
-   })
+   const returnQuery = db.query(`INSERT INTO comments (body, review_id, author) VALUES ($1,$2,$3) RETURNING *`, [body, review_id, username])
 
+   return Promise.all([returnQuery, fetchComments(review_id)])
+   .then((comment)=>{
+      return {comment: comment[0].rows}
+   })
 }
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment}
+
+const updateVotes = (review_id, inc_votes) => {
+   return db.query(`SELECT * FROM reviews;`).catch(next)
+}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes}

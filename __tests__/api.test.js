@@ -85,7 +85,6 @@ describe('/get/reviews/:review_id/comments', ()=>{
     test('responds with an array of comments when passed a review ID', ()=>{
         return request(app).get('/api/reviews/2/comments').expect(200).then((result)=>{
             const output = result.body.comments
-            // console.log(output)
             expect(output.length).toBe(3)
             output.forEach((comment)=>{
                 expect(comment).toHaveProperty('comment_id', expect.any(Number))
@@ -146,7 +145,7 @@ describe('POST api/reviews/:review_id/comments', ()=>{
         }
         return request(app).post('/api/reviews/100/comments').send(commentToPost).expect(404)
         .then((err)=>{
-            expect(err.body.msg).toBe("You can't comment on a review that doesn't exist!")
+            expect(err.body.msg).toBe(`Key (review_id)=(100) is not present in table \"reviews\".`)
         })
     })
     test('responds with 400 bad request when passed an invalid id', ()=>{
@@ -156,7 +155,25 @@ describe('POST api/reviews/:review_id/comments', ()=>{
         }
         return request(app).post('/api/reviews/notAReview/comments').send(commentToPost).expect(400)
         .then((result)=>{
-            expect(result.body.msg).toBe("Invalid Id, please enter a number.")
+            expect(result.body.msg).toBe("Bad Request!")
+        })
+    })
+    test('responds with 404 when using invalid username', ()=>{
+        const commentToPost = {
+            body: 'test',
+            username: 'notAUserName',
+        }
+        return request(app).post('/api/reviews/2/comments').send(commentToPost).then((result)=>{
+            expect(result.body.msg).toBe(`Key (author)=(notAUserName) is not present in table \"users\".`)
+        })
+    })
+    test('responds with 400 bad request when passing an invalid object to post', ()=>{
+        const commentToPost = {
+            notABody: 'test',
+            notAUser: 'philippaclaire9',
+        }
+        return request(app).post('/api/reviews/2/comments').send(commentToPost).then((result)=>{
+            expect(result.body.msg).toBe(`Bad post request!`)
         })
     })
 })

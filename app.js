@@ -16,7 +16,6 @@ app.patch('/api/reviews/:review_id', patchReview)
 
 
 app.use((err, request, response, next) =>{
-    // console.log(err)
     if(err.status&&err.msg){
         response.status(err.status).send({msg: err.msg})
     }next(err)

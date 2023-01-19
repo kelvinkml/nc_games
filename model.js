@@ -7,17 +7,14 @@ const fetchCategories = ()=>{
    return db.query(`SELECT * FROM categories;`)
 }
 
-const fetchReviews = (category, sort_by, order_by)=>{
+const fetchReviews = (category, sort_by = 'created_at', order_by = 'DESC')=>{
    const acceptedOrder = ['ASC', 'DESC']
    const acceptedSort = ['votes', 'created_at', 'title', 'designer', 'owner']
-   // const acceptedCategory = ['euro_game', 'dexterity', 'social_deduction']
 
    if(sort_by && !acceptedSort.includes(sort_by)){
       return Promise.reject({status : 400, msg : 'Invalid sort query'})
    }
-   // if(category && !acceptedCategory.includes(category)){
-   //    return Promise.reject({status : 400, msg : 'Invalid category'})
-   // }
+
    if(order_by && !acceptedOrder.includes(order_by)){
       return Promise.reject({status : 400, msg : 'Invalid order statement'})
    }
@@ -36,19 +33,9 @@ const fetchReviews = (category, sort_by, order_by)=>{
 
    queryStr +=  `GROUP BY reviews.review_id `
    
-   if(sort_by){
-      queryStr += `ORDER BY ${sort_by} `
-   }
-   else{
-      queryStr += `ORDER BY created_at `
-   }
+   queryStr += `ORDER BY ${sort_by} `
 
-   if(order_by){
-      queryStr += `${order_by}`
-   }
-   else{
-      queryStr += `DESC`
-   }
+   queryStr += `${order_by}`
 
    return db.query(queryStr, queryValues)
    .then((reviews)=>{

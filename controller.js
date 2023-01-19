@@ -41,8 +41,12 @@ const postComment = (request, response, next) =>{
 }
 
 const patchReview = (request, response, next) => {
-    updateVotes(review_id, inc_votes).then((updatedReview)=>{
-        response.status(202).send(updatedReview)
+    const {review_id} = request.params
+    const {body} = request
+    updateVotes(review_id, body).then((updatedReview)=>{
+        const {review} = updatedReview
+        response.status(200).send(review)
     })
+    .catch(next)
 }
 module.exports = { getCategories, getReviews, getReviewById, getComments, postComment, patchReview }

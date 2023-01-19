@@ -163,7 +163,7 @@ describe('POST api/reviews/:review_id/comments', ()=>{
             body: 'test',
             username: 'notAUserName',
         }
-        return request(app).post('/api/reviews/2/comments').send(commentToPost).then((result)=>{
+        return request(app).post('/api/reviews/2/comments').send(commentToPost).expect(404).then((result)=>{
             expect(result.body.msg).toBe(`Key (author)=(notAUserName) is not present in table \"users\".`)
         })
     })
@@ -172,8 +172,51 @@ describe('POST api/reviews/:review_id/comments', ()=>{
             notABody: 'test',
             notAUser: 'philippaclaire9',
         }
-        return request(app).post('/api/reviews/2/comments').send(commentToPost).then((result)=>{
+        return request(app).post('/api/reviews/2/comments').send(commentToPost).expect(400).then((result)=>{
             expect(result.body.msg).toBe(`Bad post request!`)
+        })
+    })
+})
+
+describe('PATCHING votes onto comments', ()=>{
+    test('responds with 200', ()=>{
+        const updateVotes = {inc_votes: 1}
+        return request(app).patch('/api/reviews/2').send(updateVotes).expect(200)
+    })
+    test('updates vote count with + inc_votes', ()=>{
+        const updateVotes = {inc_votes: 1}
+        return request(app).patch('/api/reviews/1').send(updateVotes).expect(200).then((review)=>{
+            expect(review.body[0].votes).toBe(2)
+        })
+    })
+    test('updated vote count with - inc_votes and resets to 0 if votes is a negative number', ()=>{
+        const negativeVotes = {inc_votes: -1000}
+        return request(app).patch('/api/reviews/1').send(negativeVotes).expect(200).then((review)=>{
+            expect(review.body[0].votes).toBe(0)
+        })
+    })
+    test('updating a different review with same params as previous test', ()=>{
+        const negativeVotes = {inc_votes: -1000}
+        return request(app).patch('/api/reviews/3').send(negativeVotes).expect(200).then((review)=>{
+            expect(review.body[0].votes).toBe(0)
+        })
+    })
+    test('returns with 404 when an id is not found', ()=>{
+        const updateVotes = {inc_votes: 1}
+        return request(app).patch('/api/reviews/100').send(updateVotes).expect(404).then((response)=>{
+            expect(response.body.msg).toBe('Not Found!')
+        })
+    })
+    test('returns 400 bad request when inc_votes is not accepted data type', ()=>{
+        const updateVotes = {inc_votes: 'string'}
+        return request(app).patch('/api/reviews/1').send(updateVotes).expect(400).then((response)=>{
+            expect(response.body.msg).toBe('Bad Request!')
+        })
+    })
+    test('returns 400 bad request when passed invalid key', ()=>{
+        const updateVotes = {notVotes: 1}
+        return request(app).patch('/api/reviews/1').send(updateVotes).expect(400).then((response)=>{
+            expect(response.body.msg).toBe('Bad Request!')
         })
     })
 })

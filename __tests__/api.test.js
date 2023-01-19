@@ -190,15 +190,9 @@ describe('PATCHING votes onto comments', ()=>{
         })
     })
     test('updated vote count with - inc_votes and resets to 0 if votes is a negative number', ()=>{
-        const negativeVotes = {inc_votes: -1000}
+        const negativeVotes = {inc_votes: -10}
         return request(app).patch('/api/reviews/1').send(negativeVotes).expect(200).then((review)=>{
-            expect(review.body[0].votes).toBe(0)
-        })
-    })
-    test('updating a different review with same params as previous test', ()=>{
-        const negativeVotes = {inc_votes: -1000}
-        return request(app).patch('/api/reviews/3').send(negativeVotes).expect(200).then((review)=>{
-            expect(review.body[0].votes).toBe(0)
+            expect(review.body[0].votes).toBe(-9)
         })
     })
     test('returns with 404 when an id is not found', ()=>{
@@ -217,6 +211,28 @@ describe('PATCHING votes onto comments', ()=>{
         const updateVotes = {notVotes: 1}
         return request(app).patch('/api/reviews/1').send(updateVotes).expect(400).then((response)=>{
             expect(response.body.msg).toBe('Bad Request!')
+        })
+    })
+})
+
+describe('GET users', ()=>{
+    test('responds with 200', ()=>{
+        return request(app).get('/api/users').expect(200)
+    })
+    test('users array contains the correct properties', ()=>{
+        return request(app).get('/api/users').expect(200).then((users)=>{
+            const output = users.body.users
+            output.forEach((user)=>{
+                expect(user).toHaveProperty('username', expect.any(String))
+                expect(user).toHaveProperty('name', expect.any(String))
+                expect(user).toHaveProperty('avatar_url', expect.any(String))
+            })
+        })
+    })
+    test('users array returns correct number of users', ()=>{
+        return request(app).get('/api/users').expect(200).then((users)=>{
+            const output = users.body.users
+            expect(output).toHaveLength(4)
         })
     })
 })

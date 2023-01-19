@@ -32,7 +32,6 @@ const fetchReviewById = (reviewId) => {
 }
 
 const fetchComments = (reviewId) => {
-
    const returnQuery = db.query(`
    SELECT * FROM comments
    WHERE comments.review_id = $1
@@ -43,6 +42,10 @@ const fetchComments = (reviewId) => {
    .then((comments)=>{
       return {comments: comments[0].rows}
    })
+}
+
+const fetchAllUsers = () => {
+   return db.query(`SELECT * FROM users`)
 }
 
 const newComment = (review_id, comment) => {
@@ -63,13 +66,11 @@ const updateVotes = (review_id, inc_votes) => {
    if(inc_votes.inc_votes > 0){
       incrementVotes = `+${inc_votes.inc_votes}`
    }
-   let queryStr = `UPDATE reviews SET votes = votes ${incrementVotes} WHERE review_id = ${review_id};
-   UPDATE reviews SET votes = CASE WHEN votes < 0 THEN 0 ELSE votes END WHERE review_id = ${review_id};
-   SELECT * FROM reviews WHERE review_id = ${review_id};`
+   let queryStr = `UPDATE reviews SET votes = votes ${incrementVotes} WHERE review_id = ${review_id} RETURNING *`
 
    const dbQuery = db.query(queryStr)
    return Promise.all([dbQuery, fetchComments(review_id) ]).then((review)=>{
-      return {review : review[0][2].rows}
+      return {review : review[0].rows}
    })
 }
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers}

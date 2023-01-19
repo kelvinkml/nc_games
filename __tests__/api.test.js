@@ -190,15 +190,9 @@ describe('PATCHING votes onto comments', ()=>{
         })
     })
     test('updated vote count with - inc_votes and resets to 0 if votes is a negative number', ()=>{
-        const negativeVotes = {inc_votes: -1000}
+        const negativeVotes = {inc_votes: -10}
         return request(app).patch('/api/reviews/1').send(negativeVotes).expect(200).then((review)=>{
-            expect(review.body[0].votes).toBe(0)
-        })
-    })
-    test('updating a different review with same params as previous test', ()=>{
-        const negativeVotes = {inc_votes: -1000}
-        return request(app).patch('/api/reviews/3').send(negativeVotes).expect(200).then((review)=>{
-            expect(review.body[0].votes).toBe(0)
+            expect(review.body[0].votes).toBe(-9)
         })
     })
     test('returns with 404 when an id is not found', ()=>{

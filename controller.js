@@ -1,5 +1,5 @@
 const { response, use } = require('./app')
-const {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers} = require('./model')
+const {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories} = require('./model')
 
 const getCategories = (request, response, next) => {
     fetchCategories()
@@ -10,10 +10,21 @@ const getCategories = (request, response, next) => {
 }
 
 const getReviews = (request, response, next) => {
-    fetchReviews()       
+    const {order_by} = request.query
+    let {category} = request.query
+    const {sort_by} = request.query
+
+    if(category){
+        checkCategories(category).then((isCategory)=>{
+            category = isCategory
+        })
+        .catch(next)
+    }
+    fetchReviews(category, sort_by, order_by)       
         .then((reviews)=>{
             response.status(200).send(reviews)
-        }).catch(next)
+        })
+    .catch(next)
 }
 
 const getReviewById = (request, response, next) =>{

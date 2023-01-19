@@ -220,3 +220,25 @@ describe('PATCHING votes onto comments', ()=>{
         })
     })
 })
+
+describe('GET users', ()=>{
+    test('responds with 200', ()=>{
+        return request(app).get('/api/users').expect(200)
+    })
+    test('users array contains the correct properties', ()=>{
+        return request(app).get('/api/users').expect(200).then((users)=>{
+            const output = users.body.users
+            output.forEach((user)=>{
+                expect(user).toHaveProperty('username', expect.any(String))
+                expect(user).toHaveProperty('name', expect.any(String))
+                expect(user).toHaveProperty('avatar_url', expect.any(String))
+            })
+        })
+    })
+    test('users array returns correct number of users', ()=>{
+        return request(app).get('/api/users').expect(200).then((users)=>{
+            const output = users.body.users
+            expect(output).toHaveLength(4)
+        })
+    })
+})

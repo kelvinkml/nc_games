@@ -32,7 +32,6 @@ const fetchReviewById = (reviewId) => {
 }
 
 const fetchComments = (reviewId) => {
-
    const returnQuery = db.query(`
    SELECT * FROM comments
    WHERE comments.review_id = $1
@@ -43,6 +42,10 @@ const fetchComments = (reviewId) => {
    .then((comments)=>{
       return {comments: comments[0].rows}
    })
+}
+
+const fetchAllUsers = () => {
+   return db.query(`SELECT * FROM users`)
 }
 
 const newComment = (review_id, comment) => {
@@ -72,4 +75,4 @@ const updateVotes = (review_id, inc_votes) => {
       return {review : review[0][2].rows}
    })
 }
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers}

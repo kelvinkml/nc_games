@@ -307,3 +307,31 @@ describe('checkCategories for get reviews', ()=>{
 })
 
 
+describe('DELETE comment by id', ()=>{
+    test('queries db and returns all comments', ()=>{
+        return request(app).get('/api/comments').expect(200).then((allComments)=>{
+            const output = allComments.body.comments.rows
+            expect(output).toHaveLength(6)
+        })
+    })
+    test('queries db and returns all comments after delete request', ()=>{
+        return request(app).delete('/api/comments/2').expect(204).then(()=>{
+            return request(app).get('/api/comments').expect(200).then((allComments)=>{
+                const output2 = allComments.body.comments.rows
+                expect(output2).toHaveLength(5)
+            })
+        })
+    })
+    test('returns 404 when passed invalid comment id', ()=>{
+        return request(app).delete('/api/comments/1000').expect(404).then((result)=>{
+            const output = result.body.msg
+            expect(output).toBe('Not Found')
+        })
+    })
+    test('returns 400 bad request when passed an invalid comment id', ()=>{
+        return request(app).delete('/api/comments/notanid').expect(400).then((result)=>{
+            const output = result.body.msg
+            expect(output).toBe('Bad Request')
+        })
+    })
+})

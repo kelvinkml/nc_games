@@ -1,5 +1,5 @@
 const { response, use } = require('./app')
-const {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories} = require('./model')
+const {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories, deleteComment, fetchAllComments} = require('./model')
 
 const getCategories = (request, response, next) => {
     fetchCategories()
@@ -50,6 +50,13 @@ const getUsers = (request, response, next) => {
     .catch(next)
 }
 
+const getAllComments = (request, response, next) => {
+    fetchAllComments().then((allComments)=>{
+        response.status(200).send(allComments)
+    })
+    .catch(next)
+}
+
 const postComment = (request, response, next) =>{
     const {body} = request
     const {review_id} = request.params
@@ -68,4 +75,12 @@ const patchReview = (request, response, next) => {
     })
     .catch(next)
 }
-module.exports = { getCategories, getReviews, getReviewById, getComments, postComment, patchReview, getUsers }
+
+const deleteCommentById = (request, response, next) => {
+    const {comment_id} = request.params
+    deleteComment(comment_id).then(()=>{
+        response.status(204).send({status : 204})
+    })
+    .catch(next)
+}
+module.exports = { getCategories, getReviews, getReviewById, getComments, postComment, patchReview, getUsers, deleteCommentById, getAllComments}

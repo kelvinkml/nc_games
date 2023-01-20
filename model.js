@@ -1,6 +1,7 @@
 const { response } = require("./app")
 const db = require("./db/connection")
 const format = require('pg-format')
+const { getAllComments } = require("./controller")
 
 
 const fetchCategories = ()=>{
@@ -70,6 +71,12 @@ const fetchComments = (reviewId) => {
    })
 }
 
+const fetchAllComments = () => {
+   return db.query(`SELECT * FROM comments ORDER BY created_at DESC;`).then((allComments)=>{
+      return {comments : allComments}
+   })
+}
+
 const fetchAllUsers = () => {
    return db.query(`SELECT * FROM users`)
 }
@@ -112,4 +119,20 @@ const checkCategories = (category) => {
       else return category
    })
 }
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories}
+
+const deleteComment = (commentId) => {
+   if(!+commentId){
+      return Promise.reject({status: 400, msg: 'Bad Request'})
+   }
+   const checkComment = db.query(`SELECT * FROM comments WHERE comment_id = ${commentId}`).then((checkedComment)=>{
+      if(!checkedComment.rowCount){
+         return Promise.reject({status: 404, msg: 'Not Found'})
+      }
+   })
+   const dbQuery = db.query(`DELETE FROM comments WHERE comment_id = ${commentId};`)
+   return Promise.all([dbQuery, checkComment]).then(()=>{
+      return {status: 204, msg: 'No Content'}
+   })
+
+}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories, deleteComment, fetchAllComments}

@@ -76,6 +76,12 @@ describe('api/review/:review_id', ()=>{
             expect(err.body.msg).toBe('Bad Request!')
         })
     })
+    test('returns total comment count for a specific review',()=>{
+        return request(app).get('/api/reviews/2').expect(200).then((review)=>{
+            const output = review.body.review[0]
+            expect(output.comment_count).toBe('3')
+        })
+    })
 })
 
 describe('/get/reviews/:review_id/comments', ()=>{
@@ -299,3 +305,5 @@ describe('checkCategories for get reviews', ()=>{
         })
     })
 })
+
+

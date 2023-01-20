@@ -1,4 +1,5 @@
 const db = require("./db/connection")
+const format = require('pg-format')
 
 const fetchCategories = ()=>{
    return db.query(`SELECT * FROM categories;`)

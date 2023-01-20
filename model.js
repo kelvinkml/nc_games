@@ -1,8 +1,4 @@
-const { response } = require("./app")
 const db = require("./db/connection")
-const format = require('pg-format')
-const { getAllComments } = require("./controller")
-
 
 const fetchCategories = ()=>{
    return db.query(`SELECT * FROM categories;`)

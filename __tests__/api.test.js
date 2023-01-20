@@ -8,7 +8,7 @@ beforeEach(()=> seed(testData))
 
 afterAll(()=> db.end())
 
-
+jest.setTimeout(2000)
 
 describe('api/categories', ()=>{
     test('responds with status code 200', ()=>{
@@ -233,6 +233,69 @@ describe('GET users', ()=>{
         return request(app).get('/api/users').expect(200).then((users)=>{
             const output = users.body.users
             expect(output).toHaveLength(4)
+        })
+    })
+})
+
+describe('GET reviews with queries', ()=>{
+    test('returns status 200', () =>{
+        return request(app).get('/api/reviews?category=dexterity').expect(200)
+    })
+    test('returns all reviews with matching category', ()=>{
+        return request(app).get('/api/reviews?category=dexterity').expect(200).then((response)=>{
+            const output = response.body.reviews[0]
+            expect(output.category).toBe('dexterity')
+        })
+    })
+    test('returns all reviews with matching 2 word category', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction').expect(200).then((reviews)=>{
+            const output = reviews.body.reviews
+            output.forEach((review)=>{
+                expect(review.category).toBe('social deduction')
+            })
+        })
+    })
+    test('returns all arrays with matching category with custom sorting', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction&sort_by=votes')
+        .expect(200).then((reviews)=>{
+            const output = reviews.body.reviews
+            expect(output).toBeSorted({descending: 'true', key : 'votes'})
+        })
+    })
+    test('custom order by query', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction&sort_by=votes&order_by=ASC')
+        .expect(200).then((reviews)=>{
+            const output = reviews.body.reviews
+            expect(output).toBeSorted({ascending: 'true', key : 'votes'})
+        })
+    })
+    test('returns 400 bad request when passed invalid category', ()=>{
+        return request(app).get('/api/reviews?category=notacategory').expect(400).then((result)=>{
+            expect(result.body.msg).toBe('Invalid Category')
+        })
+    })
+    test('returns 400 bad request when passed invalid sort query', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction&sort_by=invalid').expect(400).then((result)=>{
+            expect(result.body.msg).toBe('Invalid sort query')
+        })
+    })
+    test('returns 400 bad request when passed invalid order by', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction&sort_by=votes&order_by=notASC').expect(400).then((result)=>{
+            expect(result.body.msg).toBe('Invalid order statement')
+        })
+    })
+})
+
+describe('checkCategories for get reviews', ()=>{
+    test('returns 200', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction').expect(200)
+    })
+    test('returns correct reviews based on category after passing through checkCat function', ()=>{
+        return request(app).get('/api/reviews?category=social_deduction').expect(200).then((reviews)=>{
+            const output = reviews.body.reviews
+            output.forEach((review)=>{
+                expect(review.category).toBe('social deduction')
+            })
         })
     })
 })

@@ -6,17 +6,43 @@ const format = require('pg-format')
 const fetchCategories = ()=>{
    return db.query(`SELECT * FROM categories;`)
 }
-const fetchReviews = ()=>{
-   return db.query
-   (`SELECT reviews.* , COUNT(reviews.review_id) AS comment_count 
-   FROM reviews
-   LEFT JOIN comments ON reviews.review_id = comments.review_id
-   GROUP BY reviews.review_id
-   ORDER BY created_at DESC;`)
+
+const fetchReviews = (category, sort_by = 'created_at', order_by = 'DESC')=>{
+   const acceptedOrder = ['ASC', 'DESC']
+   const acceptedSort = ['votes', 'created_at', 'title', 'designer', 'owner']
+
+   if(sort_by && !acceptedSort.includes(sort_by)){
+      return Promise.reject({status : 400, msg : 'Invalid sort query'})
+   }
+
+   if(order_by && !acceptedOrder.includes(order_by)){
+      return Promise.reject({status : 400, msg : 'Invalid order statement'})
+   }
+
+   const queryValues = []
+
+   let queryStr = `SELECT reviews.* , COUNT(reviews.review_id) AS comment_count 
+      FROM reviews
+      LEFT JOIN comments ON reviews.review_id = comments.review_id `
+   
+   if(category){
+      const categoryStr = category.replace('_', ' ')
+      queryValues.push(`%${categoryStr}%`)
+      queryStr += `WHERE category LIKE $1 `
+   }
+
+   queryStr +=  `GROUP BY reviews.review_id `
+   
+   queryStr += `ORDER BY ${sort_by} `
+
+   queryStr += `${order_by}`
+
+   return db.query(queryStr, queryValues)
    .then((reviews)=>{
       return {reviews:reviews.rows}
    })
 }
+
 const fetchReviewById = (reviewId) => {
    return db.query(`SELECT reviews.* , COUNT(reviews.review_id) AS comment_count 
    FROM reviews
@@ -73,4 +99,17 @@ const updateVotes = (review_id, inc_votes) => {
       return {review : review[0].rows}
    })
 }
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers}
+
+const checkCategories = (category) => {
+   if(!category){
+      return 'No Category'
+   }
+   const categoryStr = category.replace('_', ' ')
+   return db.query(`SELECT * FROM reviews WHERE category = '${categoryStr}'`).then((categories)=>{
+      if (categories.rows.length === 0){
+         return Promise.reject({status:400, msg:'Invalid Category'})
+      }
+      else return category
+   })
+}
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchComments, newComment, updateVotes, fetchAllUsers, checkCategories}

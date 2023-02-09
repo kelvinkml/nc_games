@@ -7,7 +7,7 @@ const fetchCategories = ()=>{
 
 const fetchReviews = (category, sort_by = 'created_at', order_by = 'DESC')=>{
    const acceptedOrder = ['ASC', 'DESC']
-   const acceptedSort = ['votes', 'created_at', 'title', 'designer', 'owner']
+   const acceptedSort = ['votes', 'created_at', 'title', 'designer', 'owner', 'comment_count']
 
    if(sort_by && !acceptedSort.includes(sort_by)){
       return Promise.reject({status : 400, msg : 'Invalid sort query'})
